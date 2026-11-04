@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f172a">
+  <title>Pengumuman Kelulusan SMK Al-Fattah Kalitidu 2026/2027</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .dark-glass { background: rgba(15, 23, 42, .85); backdrop-filter: blur(12px); }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between bg-gradient-to-br from-slate-900 via-indigo-950 to-blue-950 text-slate-100">
+  <header class="sticky top-0 z-40 w-full border-b border-white/10 bg-slate-900/80 px-4 py-4 backdrop-blur-md sm:px-6">
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-3">
+      <div class="flex min-w-0 items-center gap-3">
+        <div class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/20 bg-white p-1 shadow-lg shadow-indigo-500/20">
+          <img id="displayLogo" src="https://img.icons8.com/color/96/graduation-cap.png" alt="Logo sekolah" class="h-full w-full object-contain">
+        </div>
+        <div class="min-w-0">
+          <h1 id="displaySchoolName" class="truncate text-lg font-bold tracking-wide text-white md:text-xl">SMK AL-FATTAH KALITIDU</h1>
+          <p id="displaySubtitle" class="truncate text-xs text-indigo-300">Portal Pengumuman Kelulusan TP 2026/2027</p>
+        </div>
+      </div>
+      <button type="button" onclick="openAdminModal()" class="flex shrink-0 items-center gap-2 rounded-xl bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-600/30 transition hover:bg-indigo-500 sm:px-4">
+        <i class="fa-solid fa-lock text-xs" aria-hidden="true"></i><span class="hidden sm:inline">Panel Admin</span><span class="sm:hidden">Admin</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="my-auto flex w-full max-w-4xl flex-grow flex-col items-center justify-center p-4 md:p-6">
+    <section class="mb-6 grid w-full grid-cols-3 gap-3" aria-label="Statistik kelulusan">
+      <div class="dark-glass rounded-2xl border border-white/10 p-3 text-center shadow-md"><p class="text-xs font-medium text-slate-400">Total Siswa</p><p id="statTotal" class="mt-1 text-xl font-bold text-white">0</p></div>
+      <div class="dark-glass rounded-2xl border border-white/10 p-3 text-center shadow-md"><p class="text-xs font-medium text-emerald-400">Lulus</p><p id="statLulus" class="mt-1 text-xl font-bold text-emerald-400">0</p></div>
+      <div class="dark-glass rounded-2xl border border-white/10 p-3 text-center shadow-md"><p class="text-xs font-medium text-rose-400">Tidak Lulus</p><p id="statTidakLulus" class="mt-1 text-xl font-bold text-rose-400">0</p></div>
+    </section>
+
+    <section class="relative w-full overflow-hidden rounded-3xl border border-white/10 p-6 shadow-2xl dark-glass md:p-10">
+      <div class="mx-auto mb-8 max-w-lg text-center">
+        <span class="mb-3 inline-block rounded-full border border-indigo-500/30 bg-indigo-500/20 px-3 py-1 text-xs font-semibold text-indigo-300"><i class="fa-solid fa-certificate mr-1" aria-hidden="true"></i>Pengumuman Kelulusan Resmi</span>
+        <h2 class="text-2xl font-extrabold tracking-tight text-white md:text-3xl">Cek Kelulusan Siswa</h2>
+        <p class="mt-2 text-sm text-slate-400">Masukkan NISN atau Nomor Ujian Anda untuk melihat status kelulusan dan nilai rata-rata.</p>
+      </div>
+
+      <div id="countdownBanner" class="mb-6 hidden rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4 text-center" role="status" aria-live="polite">
+        <p id="countdownLabel" class="text-xs font-semibold uppercase tracking-wider text-amber-400">Pengumuman dibuka dalam:</p>
+        <div id="countdownTimer" class="mt-1 text-lg font-bold text-amber-300 md:text-xl"></div>
+      </div>
+
+      <form id="searchForm" class="space-y-4">
+        <label for="searchInput" class="sr-only">NISN atau Nomor Ujian</label>
+        <div class="relative">
+          <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400"><i class="fa-solid fa-id-card" aria-hidden="true"></i></div>
+          <input type="text" id="searchInput" required autocomplete="off" placeholder="Masukkan NISN atau No Ujian (Contoh: 0071234561)" class="w-full rounded-2xl border border-white/10 bg-slate-900/80 py-3.5 pl-11 pr-4 text-sm text-white transition-all placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 md:text-base">
+        </div>
+        <button id="searchButton" type="submit" class="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-600/30 transition-all hover:from-indigo-500 hover:to-blue-500 disabled:cursor-not-allowed disabled:opacity-50 md:text-base">
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><span>Periksa Kelulusan</span>
+        </button>
+      </form>
+      <div id="resultContainer" class="mt-8 hidden border-t border-white/10 pt-6" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer class="mt-10 w-full border-t border-white/10 py-6 text-center text-xs text-slate-500">
+    <p>&copy; 2026 SMK Al-Fattah Kalitidu. All Rights Reserved.</p>
+  </footer>
+
+  <div id="adminModal" class="fixed inset-0 z-50 hidden items-center justify-center overflow-y-auto bg-slate-950/80 p-3 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="adminModalTitle">
+    <div class="my-auto w-full max-w-xl overflow-hidden rounded-2xl border border-white/10 bg-slate-900 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-white/10 bg-slate-800/50 p-4">
+        <div class="flex items-center gap-2"><i class="fa-solid fa-shield-halved text-indigo-400" aria-hidden="true"></i><h3 id="adminModalTitle" class="text-base font-bold text-white">Panel Kontrol Admin</h3></div>
+        <button type="button" onclick="closeAdminModal()" aria-label="Tutup panel admin" class="p-2 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg" aria-hidden="true"></i></button>
+      </div>
+
+      <form id="adminLoginForm" class="space-y-4 p-6">
+        <p class="text-center text-sm text-slate-400">Masukkan PIN admin untuk mengelola data dan pengaturan.</p>
+        <div class="mx-auto max-w-xs space-y-3">
+          <label for="adminPinInput" class="sr-only">PIN Admin</label>
+          <input type="password" id="adminPinInput" autocomplete="current-password" placeholder="PIN Admin (default: admin123)" class="w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 text-center text-sm tracking-widest text-white focus:border-indigo-500 focus:outline-none">
+          <button type="submit" class="w-full rounded-xl bg-indigo-600 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:bg-indigo-500">Masuk Panel Admin</button>
+        </div>
+      </form>
+
+      <div id="adminDashboardView" class="hidden flex-col">
+        <div class="flex overflow-x-auto border-b border-white/10 bg-slate-950/50">
+          <button type="button" onclick="switchAdminTab('import')" id="tabBtnImport" class="whitespace-nowrap border-b-2 border-indigo-500 px-4 py-2.5 text-xs font-semibold text-white">Import Excel</button>
+          <button type="button" onclick="switchAdminTab('data')" id="tabBtnData" class="whitespace-nowrap border-b-2 border-transparent px-4 py-2.5 text-xs font-semibold text-slate-400 hover:text-white">Data Siswa</button>
+          <button type="button" onclick="switchAdminTab('branding')" id="tabBtnBranding" class="whitespace-nowrap border-b-2 border-transparent px-4 py-2.5 text-xs font-semibold text-slate-400 hover:text-white">Branding Logo</button>
+          <button type="button" onclick="switchAdminTab('settings')" id="tabBtnSettings" class="whitespace-nowrap border-b-2 border-transparent px-4 py-2.5 text-xs font-semibold text-slate-400 hover:text-white">Pengaturan</button>
+        </div>
+
+        <div class="max-h-[65vh] space-y-5 overflow-y-auto p-5">
+          <section id="tabContentImport" class="space-y-4">
+            <div class="space-y-2 rounded-xl border border-indigo-500/30 bg-indigo-950/50 p-4">
+              <h4 class="flex items-center text-xs font-bold text-white"><i class="fa-solid fa-file-excel mr-2 text-base text-emerald-400" aria-hidden="true"></i>Unduh Template File Excel</h4>
+              <p class="text-xs leading-relaxed text-slate-300">Kolom template: <code class="text-indigo-300">nisn, no_ujian, nama, jurusan, status, rata_rata</code>.</p>
+              <button type="button" onclick="downloadTemplate()" class="inline-flex items-center space-x-1.5 rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white shadow transition-all hover:bg-emerald-500"><i class="fa-solid fa-download" aria-hidden="true"></i><span>Download Template (.csv)</span></button>
+            </div>
+            <div class="space-y-3 rounded-xl border-2 border-dashed border-white/20 p-6 text-center transition-all hover:border-indigo-500">
+              <i class="fa-solid fa-cloud-arrow-up text-3xl text-indigo-400" aria-hidden="true"></i>
+              <div><h5 class="mb-1 text-xs font-semibold text-white">Unggah File Data Nilai</h5><p class="mb-3 text-[11px] text-slate-400">Format .xlsx, .xls, atau .csv</p>
+                <label for="excelFile" class="inline-block cursor-pointer rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow transition-all hover:bg-indigo-500"><i class="fa-solid fa-folder-open mr-1" aria-hidden="true"></i>Pilih File</label>
+                <input type="file" id="excelFile" accept=".xlsx,.xls,.csv" class="hidden">
+              </div>
+            </div>
+          </section>
+
+          <section id="tabContentData" class="hidden space-y-3">
+            <div class="flex items-center justify-between gap-2"><h4 class="text-xs font-semibold text-white">Daftar Siswa Terdaftar</h4><button type="button" onclick="clearAllData()" class="rounded border border-rose-500/30 bg-rose-500/20 px-2.5 py-1 text-[11px] text-rose-300 transition-all hover:bg-rose-500/30"><i class="fa-solid fa-trash mr-1" aria-hidden="true"></i>Hapus Semua</button></div>
+            <div class="max-h-56 overflow-x-auto rounded-xl border border-white/10">
+              <table class="w-full text-left text-xs">
+                <thead class="sticky top-0 border-b border-white/10 bg-slate-800 text-slate-300"><tr><th class="p-2.5">NISN / No Ujian</th><th class="p-2.5">Nama</th><th class="p-2.5">Status</th><th class="p-2.5">Rata²</th><th class="p-2.5 text-center">Aksi</th></tr></thead>
+                <tbody id="adminTableBody" class="divide-y divide-white/10 text-slate-300"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section id="tabContentBranding" class="hidden space-y-3.5">
+            <h4 class="text-xs font-semibold text-white">Logo & Nama Sekolah</h4>
+            <div><label for="inputSchoolName" class="mb-1 block text-[11px] text-slate-400">Nama Sekolah</label><input type="text" id="inputSchoolName" maxlength="100" class="w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none"></div>
+            <div><label for="inputSubtitle" class="mb-1 block text-[11px] text-slate-400">Sub-Judul</label><input type="text" id="inputSubtitle" maxlength="140" class="w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none"></div>
+            <div><label class="mb-1 block text-[11px] text-slate-400" for="inputLogoFile">Pratinjau Logo</label><div class="mb-2 flex h-14 w-14 items-center justify-center rounded-xl border border-white/10 bg-slate-950 p-1.5"><img id="previewLogoImg" src="" alt="Pratinjau logo" class="max-h-full max-w-full object-contain"></div><input type="file" id="inputLogoFile" accept="image/png,image/jpeg,image/webp,image/gif" class="w-full cursor-pointer text-xs text-slate-400 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-600 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white"></div>
+            <div class="flex gap-2 pt-1"><button type="button" onclick="saveBranding()" class="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow hover:bg-indigo-500">Simpan Branding</button><button type="button" onclick="resetBranding()" class="rounded-xl bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700">Reset</button></div>
+          </section>
+
+          <section id="tabContentSettings" class="hidden space-y-3.5">
+            <h4 class="text-xs font-semibold text-white">Pengaturan Pengumuman & Keamanan</h4>
+            <div><label for="settingStatus" class="mb-1 block text-[11px] text-slate-400">Status Pengumuman</label><select id="settingStatus" class="w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none"><option value="open">DIBUKA (Langsung Aktif)</option><option value="countdown">SESUAI TIMER COUNTDOWN</option><option value="closed">DITUTUP</option></select></div>
+            <div><label for="settingTargetTime" class="mb-1 block text-[11px] text-slate-400">Waktu Target Buka</label><input type="datetime-local" id="settingTargetTime" class="w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none"></div>
+            <div><label for="settingNewPin" class="mb-1 block text-[11px] text-slate-400">Ubah PIN Admin</label><input type="password" id="settingNewPin" autocomplete="new-password" maxlength="100" placeholder="Kosongkan jika tidak diubah" class="w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none"><p class="mt-1 text-[10px] text-slate-500">PIN tersimpan di browser ini. Simpan PIN baru dengan aman.</p></div>
+            <button type="button" onclick="saveSettings()" class="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow hover:bg-indigo-500">Simpan Pengaturan</button>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    'use strict';
+
+    const DEFAULT_STUDENTS = [];
+    const DEFAULT_BRANDING = { schoolName: 'SMK AL-FATTAH KALITIDU', subtitle: 'Portal Pengumuman Kelulusan TP 2026/2027', logoUrl: 'https://img.icons8.com/color/96/graduation-cap.png' };
+    const DEFAULT_SETTINGS = { status: 'open', targetTime: '2026-06-01T08:00', adminPin: 'admin123' };
+    const KEYS = { students: 'smk_students', branding: 'smk_branding', settings: 'smk_settings' };
+    let newLogoData = null;
+    let countdownInterval = null;
+    let adminAuthenticated = false;
+
+    function readJSON(key, fallback) {
+      try {
+        const value = localStorage.getItem(key);
+        return value ? JSON.parse(value) : fallback;
+      } catch (error) {
+        console.error('Gagal membaca penyimpanan lokal:', error);
+        return fallback;
+      }
+    }
+    function getStudents() {
+      const value = readJSON(KEYS.students, DEFAULT_STUDENTS);
+      return Array.isArray(value) ? value.filter(function (student) {
+        return student && typeof student === 'object';
+      }) : DEFAULT_STUDENTS.slice();
+    }
+    function getBranding() {
+      return Object.assign({}, DEFAULT_BRANDING, readJSON(KEYS.branding, {}));
+    }
+    function getSettings() {
+      const value = readJSON(KEYS.settings, {});
+      return Object.assign({}, DEFAULT_SETTINGS, value && typeof value === 'object' ? value : {});
+    }
+    function storeJSON(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+        return true;
+      } catch (error) {
+        console.error('Gagal menyimpan data:', error);
+        alert('Data tidak dapat disimpan. Penyimpanan browser mungkin penuh. Coba gunakan logo yang lebih kecil.');
+        return false;
+      }
+    }
+    function escapeHTML(value) {
+      return String(value == null ? '' : value).replace(/[&<>"']/g, function (char) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char];
+      });
+    }
+    function safeLogoUrl(value) {
+      const url = String(value || '');
+      return /^https?:\/\//i.test(url) || /^data:image\/(png|jpeg|webp|gif);base64,/i.test(url) ? url : DEFAULT_BRANDING.logoUrl;
+    }
+    function updateStats() {
+      const students = getStudents();
+      const passed = students.filter(function (student) { return String(student.status).toUpperCase() === 'LULUS'; }).length;
+      document.getElementById('statTotal').textContent = students.length;
+      document.getElementById('statLulus').textContent = passed;
+      document.getElementById('statTidakLulus').textContent = students.length - passed;
+    }
+    function loadBrandingToUI() {
+      const branding = getBranding();
+      const settings = getSettings();
+      document.getElementById('displaySchoolName').textContent = branding.schoolName || DEFAULT_BRANDING.schoolName;
+      document.getElementById('displaySubtitle').textContent = branding.subtitle || DEFAULT_BRANDING.subtitle;
+      document.getElementById('displayLogo').src = safeLogoUrl(branding.logoUrl);
+      document.getElementById('previewLogoImg').src = safeLogoUrl(branding.logoUrl);
+      document.getElementById('inputSchoolName').value = branding.schoolName || '';
+      document.getElementById('inputSubtitle').value = branding.subtitle || '';
+      document.getElementById('settingStatus').value = ['open', 'closed', 'countdown'].includes(settings.status) ? settings.status : 'open';
+      document.getElementById('settingTargetTime').value = settings.targetTime || '';
+    }
+    function announcementState() {
+      const settings = getSettings();
+      if (settings.status === 'closed') return { mode: 'closed' };
+      if (settings.status === 'countdown') {
+        const target = new Date(settings.targetTime).getTime();
+        if (!Number.isFinite(target)) return { mode: 'invalid' };
+        if (Date.now() < target) return { mode: 'countdown', distance: target - Date.now() };
+      }
+      return { mode: 'open' };
+    }
+    function updateAnnouncementStatus() {
+      const banner = document.getElementById('countdownBanner');
+      const label = document.getElementById('countdownLabel');
+      const timer = document.getElementById('countdownTimer');
+      const input = document.getElementById('searchInput');
+      const button = document.getElementById('searchButton');
+      const state = announcementState();
+      const locked = state.mode !== 'open';
+      input.disabled = locked;
+      button.disabled = locked;
+      if (state.mode === 'open') {
+        banner.classList.add('hidden');
+        return;
+      }
+      document.getElementById('resultContainer').classList.add('hidden');
+      banner.classList.remove('hidden');
+      if (state.mode === 'closed') {
+        label.textContent = 'Pengumuman kelulusan';
+        timer.textContent = 'Saat ini ditutup sementara.';
+      } else if (state.mode === 'invalid') {
+        label.textContent = 'Pengumuman belum tersedia';
+        timer.textContent = 'Jadwal pembukaan belum diatur dengan benar.';
+      } else {
+        label.textContent = 'Pengumuman dibuka dalam:';
+        const totalSeconds = Math.max(0, Math.floor(state.distance / 1000));
+        const days = Math.floor(totalSeconds / 86400);
+        const hours = Math.floor((totalSeconds % 86400) / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        timer.textContent = days + ' Hari : ' + hours + ' Jam : ' + minutes + ' Menit : ' + seconds + ' Detik';
+      }
+    }
+    function startStatusClock() {
+      if (countdownInterval) window.clearInterval(countdownInterval);
+      updateAnnouncementStatus();
+      countdownInterval = window.setInterval(updateAnnouncementStatus, 1000);
+    }
+    function renderSearchMessage(title, message, tone) {
+      const container = document.getElementById('resultContainer');
+      const styles = tone === 'success'
+        ? { border: 'border-emerald-500/20', background: 'bg-emerald-500/10', icon: 'text-emerald-400', symbol: 'fa-circle-check' }
+        : tone === 'info'
+          ? { border: 'border-amber-500/20', background: 'bg-amber-500/10', icon: 'text-amber-400', symbol: 'fa-clock' }
+          : { border: 'border-rose-500/20', background: 'bg-rose-500/10', icon: 'text-rose-400', symbol: 'fa-circle-exclamation' };
+      container.innerHTML = '<div class="space-y-2 rounded-2xl border ' + styles.border + ' ' + styles.background + ' p-6 text-center">' +
+        '<i class="fa-solid ' + styles.symbol + ' ' + styles.icon + ' text-3xl" aria-hidden="true"></i>' +
+        '<h3 class="text-lg font-bold text-white">' + escapeHTML(title) + '</h3><p class="text-sm text-slate-300">' + escapeHTML(message) + '</p></div>';
+      container.classList.remove('hidden');
+    }
+    function handleSearch(event) {
+      event.preventDefault();
+      const state = announcementState();
+      if (state.mode !== 'open') {
+        updateAnnouncementStatus();
+        renderSearchMessage('Pengumuman belum dibuka', 'Pencarian hasil kelulusan tersedia setelah pengumuman dibuka.', 'info');
+        return;
+      }
+      const query = document.getElementById('searchInput').value.trim().toLocaleLowerCase('id-ID');
+      const found = getStudents().find(function (student) {
+        return String(student.nisn || '').trim().toLocaleLowerCase('id-ID') === query ||
+          String(student.no_ujian || '').trim().toLocaleLowerCase('id-ID') === query;
+      });
+      const container = document.getElementById('resultContainer');
+      if (!found) {
+        renderSearchMessage('Data Tidak Ditemukan', 'Pastikan NISN atau Nomor Ujian yang dimasukkan sudah benar.', 'error');
+        return;
+      }
+      const isPassed = String(found.status).toUpperCase() === 'LULUS';
+      if (isPassed && typeof window.confetti === 'function') window.confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      const average = Number(String(found.rata_rata).replace(',', '.'));
+      const grade = Number.isFinite(average) ? average : 0;
+      const predicate = grade >= 85 ? 'Sangat Memuaskan (A)' : grade >= 75 ? 'Memuaskan (B)' : 'Cukup (C)';
+      const resultStyle = isPassed
+        ? { border: 'border-emerald-500/30', badgeBorder: 'border-emerald-500/30', badgeBg: 'bg-emerald-500/20', badgeText: 'text-emerald-400' }
+        : { border: 'border-rose-500/30', badgeBorder: 'border-rose-500/30', badgeBg: 'bg-rose-500/20', badgeText: 'text-rose-400' };
+      container.innerHTML = '<article class="space-y-5 rounded-2xl border ' + resultStyle.border + ' bg-slate-900/90 p-5 md:p-6">' +
+        '<div class="flex items-center justify-between gap-3 border-b border-white/10 pb-4"><div class="min-w-0"><span class="text-xs text-slate-400">Hasil Verifikasi</span><h3 class="break-words text-xl font-extrabold text-white">' + escapeHTML(found.nama) + '</h3></div>' +
+        '<span class="shrink-0 rounded-full border ' + resultStyle.badgeBorder + ' ' + resultStyle.badgeBg + ' px-4 py-1.5 text-xs font-extrabold ' + resultStyle.badgeText + '">' + escapeHTML(found.status) + '</span></div>' +
+        '<div class="grid grid-cols-2 gap-3 text-sm"><div class="rounded-xl border border-white/5 bg-slate-950/50 p-3"><span class="block text-xs text-slate-400">NISN</span><span class="break-all font-semibold text-white">' + escapeHTML(found.nisn) + '</span></div>' +
+        '<div class="rounded-xl border border-white/5 bg-slate-950/50 p-3"><span class="block text-xs text-slate-400">No Ujian</span><span class="break-all font-semibold text-white">' + escapeHTML(found.no_ujian || '-') + '</span></div>' +
+        '<div class="col-span-2 rounded-xl border border-white/5 bg-slate-950/50 p-3"><span class="block text-xs text-slate-400">Jurusan</span><span class="font-semibold text-white">' + escapeHTML(found.jurusan || '-') + '</span></div></div>' +
+        '<div class="flex items-center justify-between rounded-xl border border-white/5 bg-slate-950/80 p-4"><div><span class="block text-xs text-slate-400">Nilai Rata-Rata</span><span class="text-2xl font-black text-indigo-400">' + escapeHTML(found.rata_rata) + '</span></div>' +
+        '<div class="text-right"><span class="block text-xs text-slate-400">Predikat</span><span class="text-sm font-bold text-white">' + predicate + '</span></div></div></article>';
+      container.classList.remove('hidden');
+    }
+
+    function openAdminModal() {
+      const modal = document.getElementById('adminModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      if (adminAuthenticated) {
+        document.getElementById('adminLoginForm').classList.add('hidden');
+        document.getElementById('adminDashboardView').classList.remove('hidden');
+        document.getElementById('adminDashboardView').classList.add('flex');
+        renderAdminTable();
+      } else {
+        document.getElementById('adminPinInput').focus();
+      }
+    }
+    function closeAdminModal() {
+      const modal = document.getElementById('adminModal');
+      modal.classList.remove('flex');
+      modal.classList.add('hidden');
+      adminAuthenticated = false;
+      document.getElementById('adminPinInput').value = '';
+      document.getElementById('settingNewPin').value = '';
+      document.getElementById('adminLoginForm').classList.remove('hidden');
+      document.getElementById('adminDashboardView').classList.add('hidden');
+      document.getElementById('adminDashboardView').classList.remove('flex');
+    }
+    function verifyAdminPin(event) {
+      if (event) event.preventDefault();
+      const input = document.getElementById('adminPinInput');
+      if (input.value === String(getSettings().adminPin)) {
+        adminAuthenticated = true;
+        document.getElementById('adminLoginForm').classList.add('hidden');
+        document.getElementById('adminDashboardView').classList.remove('hidden');
+        document.getElementById('adminDashboardView').classList.add('flex');
+        loadBrandingToUI();
+        renderAdminTable();
+        switchAdminTab('import');
+      } else {
+        alert('PIN Admin salah.');
+        input.value = '';
+        input.focus();
+      }
+    }
+    function switchAdminTab(tab) {
+      const tabs = ['Import', 'Data', 'Branding', 'Settings'];
+      tabs.forEach(function (name) {
+        document.getElementById('tabContent' + name).classList.add('hidden');
+        const button = document.getElementById('tabBtn' + name);
+        button.classList.remove('border-indigo-500', 'text-white');
+        button.classList.add('border-transparent', 'text-slate-400');
+      });
+      const activeName = tab.charAt(0).toUpperCase() + tab.slice(1);
+      document.getElementById('tabContent' + activeName).classList.remove('hidden');
+      const activeButton = document.getElementById('tabBtn' + activeName);
+      activeButton.classList.remove('border-transparent', 'text-slate-400');
+      activeButton.classList.add('border-indigo-500', 'text-white');
+      if (tab === 'data') renderAdminTable();
+    }
+    function renderAdminTable() {
+      const tbody = document.getElementById('adminTableBody');
+      const students = getStudents();
+      if (!students.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">Belum ada data siswa. Silakan import file.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = students.map(function (student, index) {
+        const passed = String(student.status).toUpperCase() === 'LULUS';
+        const badgeStyle = passed
+          ? { background: 'bg-emerald-500/20', text: 'text-emerald-400' }
+          : { background: 'bg-rose-500/20', text: 'text-rose-400' };
+        return '<tr class="hover:bg-slate-800/40"><td class="p-2.5 font-mono text-[11px]">' + escapeHTML(student.nisn) + '<br><span class="text-slate-500">' + escapeHTML(student.no_ujian || '-') + '</span></td>' +
+          '<td class="p-2.5 font-medium text-white">' + escapeHTML(student.nama) + '</td><td class="p-2.5"><span class="rounded ' + badgeStyle.background + ' px-1.5 py-0.5 text-[10px] font-bold ' + badgeStyle.text + '">' + escapeHTML(student.status) + '</span></td>' +
+          '<td class="p-2.5 font-semibold text-indigo-300">' + escapeHTML(student.rata_rata) + '</td><td class="p-2.5 text-center"><button type="button" onclick="deleteStudent(' + index + ')" aria-label="Hapus data ' + escapeHTML(student.nama) + '" class="p-1 text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash text-xs" aria-hidden="true"></i></button></td></tr>';
+      }).join('');
+    }
+    function deleteStudent(index) {
+      if (!confirm('Hapus data siswa ini?')) return;
+      const students = getStudents();
+      if (index < 0 || index >= students.length) return;
+      students.splice(index, 1);
+      if (storeJSON(KEYS.students, students)) {
+        updateStats();
+        renderAdminTable();
+      }
+    }
+    function clearAllData() {
+      if (!confirm('Yakin hapus semua data siswa?')) return;
+      if (storeJSON(KEYS.students, [])) {
+        updateStats();
+        renderAdminTable();
+      }
+    }
+    function normalizedHeader(value) {
+      return String(value).trim().toLowerCase().replace(/[.]/g, '').replace(/[_-]+/g, ' ').replace(/\s+/g, ' ');
+    }
+    function findValue(row, aliases) {
+      const keys = Object.keys(row);
+      const key = keys.find(function (item) { return aliases.includes(normalizedHeader(item)); });
+      return key === undefined ? '' : String(row[key] == null ? '' : row[key]).trim();
+    }
+    function parseAverage(value) {
+      const text = String(value).trim();
+      if (!text) return null;
+      const number = Number(text.replace(',', '.'));
+      return Number.isFinite(number) && number >= 0 && number <= 100 ? number : null;
+    }
+    function normalizeImportedStudent(row) {
+      const statusValue = findValue(row, ['status', 'status kelulusan']).toUpperCase().replace(/\s+/g, ' ');
+      const status = statusValue === 'LULUS' ? 'LULUS' : statusValue === 'TIDAK LULUS' ? 'TIDAK LULUS' : '';
+      const average = parseAverage(findValue(row, ['rata rata', 'nilai rata rata', 'ratarata', 'nilai']));
+      let nisn = findValue(row, ['nisn']);
+      if (/^\d+(?:\.0+)?$/.test(nisn)) {
+        nisn = nisn.replace(/\.0+$/, '');
+        if (nisn.length < 10) nisn = nisn.padStart(10, '0');
+      }
+      return {
+        nisn: nisn,
+        no_ujian: findValue(row, ['no ujian', 'noujian']),
+        nama: findValue(row, ['nama', 'nama siswa']),
+        jurusan: findValue(row, ['jurusan', 'program keahlian']),
+        status: status,
+        rata_rata: average === null ? '' : average.toFixed(2)
+      };
+    }
+    function handleExcelUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      if (typeof XLSX === 'undefined') {
+        alert('Parser Excel tidak berhasil dimuat. Periksa koneksi internet lalu muat ulang halaman.');
+        event.target.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onerror = function () {
+        alert('File tidak dapat dibaca.');
+        event.target.value = '';
+      };
+      reader.onload = function (loadEvent) {
+        try {
+          const workbook = XLSX.read(new Uint8Array(loadEvent.target.result), { type: 'array', raw: false });
+          const sheet = workbook.Sheets[workbook.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(sheet, { defval: '', raw: false });
+          const normalized = rows.map(normalizeImportedStudent);
+          const valid = [];
+          const seenNisn = new Set();
+          const seenExam = new Set();
+          let skipped = 0;
+          normalized.forEach(function (student) {
+            const nisnKey = student.nisn.toLowerCase();
+            const examKey = student.no_ujian.toLowerCase();
+            const validRow = student.nisn && student.nama && student.status && student.rata_rata !== '';
+            const duplicate = (nisnKey && seenNisn.has(nisnKey)) || (examKey && seenExam.has(examKey));
+            if (!validRow || duplicate) {
+              skipped++;
+              return;
+            }
+            seenNisn.add(nisnKey);
+            if (examKey) seenExam.add(examKey);
+            valid.push(student);
+          });
+          if (!valid.length) {
+            alert('Tidak ada data valid. Pastikan kolom NISN, nama, status, dan rata_rata terisi dengan format template.');
+            return;
+          }
+          if (!confirm('Impor ' + valid.length + ' data siswa? Data yang tersimpan saat ini akan diganti.' + (skipped ? ' ' + skipped + ' baris kosong, tidak valid, atau duplikat akan dilewati.' : ''))) return;
+          if (storeJSON(KEYS.students, valid)) {
+            updateStats();
+            renderAdminTable();
+            switchAdminTab('data');
+            alert('Berhasil mengimpor ' + valid.length + ' data siswa.' + (skipped ? ' ' + skipped + ' baris dilewati.' : ''));
+          }
+        } catch (error) {
+          console.error(error);
+          alert('File gagal diproses. Periksa format file dan nama kolomnya.');
+        } finally {
+          event.target.value = '';
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+    function csvCell(value) {
+      return '"' + String(value).replace(/"/g, '""') + '"';
+    }
+    function downloadTemplate() {
+      const rows = [
+        ['nisn', 'no_ujian', 'nama', 'jurusan', 'status', 'rata_rata'],
+        ['0071234561', 'UJ-2026-001', 'Ahmad Fauzi', 'Akuntansi dan Keuangan Lembaga', 'LULUS', '88.50'],
+        ['0071234562', 'UJ-2026-002', 'Siti Nurhaliza', 'Manajemen Perkantoran', 'LULUS', '91.25'],
+        ['0071234563', 'UJ-2026-003', 'Budi Santoso', 'Teknik Kendaraan Ringan', 'TIDAK LULUS', '68.00']
+      ];
+      const csv = '\ufeff' + rows.map(function (row) { return row.map(csvCell).join(','); }).join('\r\n');
+      const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'template_nilai_kelulusan_smk.csv';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    }
+    function handleLogoUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      if (!/^image\/(png|jpeg|webp|gif)$/.test(file.type)) {
+        alert('Pilih file logo PNG, JPG, WEBP, atau GIF.');
+        event.target.value = '';
+        return;
+      }
+      if (file.size > 1024 * 1024) {
+        alert('Ukuran logo maksimal 1 MB agar cukup disimpan di browser.');
+        event.target.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onerror = function () { alert('Logo tidak dapat dibaca.'); };
+      reader.onload = function (loadEvent) {
+        newLogoData = loadEvent.target.result;
+        document.getElementById('previewLogoImg').src = newLogoData;
+      };
+      reader.readAsDataURL(file);
+    }
+    function saveBranding() {
+      const branding = getBranding();
+      branding.schoolName = document.getElementById('inputSchoolName').value.trim() || DEFAULT_BRANDING.schoolName;
+      branding.subtitle = document.getElementById('inputSubtitle').value.trim() || DEFAULT_BRANDING.subtitle;
+      if (newLogoData) branding.logoUrl = newLogoData;
+      if (storeJSON(KEYS.branding, branding)) {
+        newLogoData = null;
+        loadBrandingToUI();
+        document.getElementById('inputLogoFile').value = '';
+        alert('Branding dan logo berhasil disimpan.');
+      }
+    }
+    function resetBranding() {
+      if (!confirm('Reset logo dan nama sekolah ke pengaturan awal?')) return;
+      if (storeJSON(KEYS.branding, DEFAULT_BRANDING)) {
+        newLogoData = null;
+        document.getElementById('inputLogoFile').value = '';
+        loadBrandingToUI();
+        alert('Branding dikembalikan ke pengaturan awal.');
+      }
+    }
+    function saveSettings() {
+      const settings = getSettings();
+      const status = document.getElementById('settingStatus').value;
+      const targetTime = document.getElementById('settingTargetTime').value;
+      const newPin = document.getElementById('settingNewPin').value.trim();
+      if (status === 'countdown' && (!targetTime || !Number.isFinite(new Date(targetTime).getTime()))) {
+        alert('Isi waktu target pembukaan yang valid untuk menggunakan countdown.');
+        return;
+      }
+      settings.status = status;
+      if (targetTime) settings.targetTime = targetTime;
+      if (newPin) settings.adminPin = newPin;
+      if (storeJSON(KEYS.settings, settings)) {
+        document.getElementById('settingNewPin').value = '';
+        startStatusClock();
+        alert(newPin ? 'Pengaturan tersimpan. PIN admin berhasil diubah.' : 'Pengaturan berhasil disimpan.');
+      }
+    }
+
+    document.getElementById('searchForm').addEventListener('submit', handleSearch);
+    document.getElementById('adminLoginForm').addEventListener('submit', verifyAdminPin);
+    document.getElementById('excelFile').addEventListener('change', handleExcelUpload);
+    document.getElementById('inputLogoFile').addEventListener('change', handleLogoUpload);
+    document.getElementById('adminModal').addEventListener('click', function (event) {
+      if (event.target === this) closeAdminModal();
+    });
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && !document.getElementById('adminModal').classList.contains('hidden')) closeAdminModal();
+    });
+    try {
+      if (!localStorage.getItem(KEYS.students)) localStorage.setItem(KEYS.students, JSON.stringify(DEFAULT_STUDENTS));
+      if (!localStorage.getItem(KEYS.branding)) localStorage.setItem(KEYS.branding, JSON.stringify(DEFAULT_BRANDING));
+      if (!localStorage.getItem(KEYS.settings)) localStorage.setItem(KEYS.settings, JSON.stringify(DEFAULT_SETTINGS));
+    } catch (error) {
+      console.error('Penyimpanan lokal tidak tersedia:', error);
+    }
+    updateStats();
+    loadBrandingToUI();
+    startStatusClock();
+  </script>
+</body>
+</html>
